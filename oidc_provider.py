@@ -1,4 +1,4 @@
-from requests import get
+from requests import auth, get, post
 from requests.models import HTTPError
 
 class OIDCProvider:
@@ -13,5 +13,14 @@ class OIDCProvider:
         self.userinfo_endpoint = oidc_config['userinfo_endpoint']
 
     def get_token(self, code: str, redirect_uri: str) -> str:
-        pass
+        resp = post(
+            self.token_endpoint, 
+            auth = (self.client_id, self.client_secret),
+            data = {
+               'grant_type': 'authorization_code',
+               'code': code,
+               'redirect_uri': redirect_uri            }
+        )
+        print(resp.status_code)
+        return ''
     

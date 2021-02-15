@@ -22,4 +22,5 @@ def init_routes(app: Flask):
             return jsonify({ 'message': 'missing code or redirect_uri' }), 400
         code = request.form['code']
         redirect_uri = request.form['redirect_uri']
+        token = oidc_provider.get_token(code = code, redirect_uri = redirect_uri)
         return jsonify({ 'message': 'Auth endpoint' })
