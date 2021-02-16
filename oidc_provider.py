@@ -1,6 +1,7 @@
 from requests import auth, get, post
 from requests.models import HTTPError
 from jwt import get_unverified_header, decode, PyJWKClient
+from typing import List, Union
 import json
 class OIDCProvider:
 
@@ -12,13 +13,6 @@ class OIDCProvider:
         self.token_endpoint = oidc_config['token_endpoint']
         self.jwks_client = PyJWKClient(oidc_config['jwks_uri'])
         self.userinfo_endpoint = oidc_config['userinfo_endpoint']
-
-    # def refresh_jwks_keys(self):
-    #     resp = get(self.jwks_uri)
-    #     if resp.status_code == 200:
-    #         self.jwks_keys = {x['kid']: algorithms.RSAAlgorithm.from_jwk(json.dumps(x)) for x in resp.json()['keys']}
-    #     else:
-    #         raise Exception('Unable to refresh the jwks keys')
 
     def get_token(self, code: str, redirect_uri: str) -> str:
         resp = post(
@@ -32,11 +26,9 @@ class OIDCProvider:
         print(resp.status_code)
         return ''
     
-    def verify_token(self, token: str) -> bool:
+    def decode_token(self, token: str, algos: List[str] = ['RS256']) -> Union[dict, bool]:
         try:
-            kid = get_unverified_header(token)['kid']
-            algo = get_unverified_header(token)['alg']
-            decoded_token = decode(token, self.jwks_client.get_signing_key_from_jwt(token).key, algorithms=[algo])
-            return True 
-        except Exception as e:
+            claims = decode(token, self.jwks_client.get_signing_key_from_jwt(token).key, algorithms=algos)
+            return claims
+        except Exception:
             return False

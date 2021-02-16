@@ -20,7 +20,7 @@ def secure_route(f):
         if auth_header_parts[0] != 'Bearer':
             return jsonify({'error': 'missing/invalid token'}), 401
         token = auth_header_parts[1]
-        if not oidc_provider.verify_token(token):
+        if not oidc_provider.decode_token(token):
             return jsonify({'error': 'missing/invalid token'}), 401
         return f(*args, **kwargs)
     return wrapper
